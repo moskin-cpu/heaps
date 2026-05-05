@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heap Trainer</title>
+  <style>
+    :root {
+      --ink: #1e2a2f;
+      --muted: #647276;
+      --paper: #f8f4ea;
+      --panel: #fffdf7;
+      --line: #c8d1cb;
+      --green: #277a56;
+      --red: #c4463f;
+      --blue: #226a8c;
+      --gold: #d9972b;
+      --shadow: 0 18px 42px rgba(28, 43, 45, .16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(120deg, rgba(34, 106, 140, .11), transparent 34%),
+        linear-gradient(300deg, rgba(217, 151, 43, .14), transparent 36%),
+        var(--paper);
+    }
+
+    button,
+    input {
+      border: 0;
+      color: inherit;
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .48;
+    }
+
+    .app {
+      width: min(1220px, calc(100vw - 28px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 0;
+      display: grid;
+      grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .side,
+    .stage {
+      border: 1px solid rgba(75, 90, 88, .2);
+      background: rgba(255, 253, 247, .9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .side {
+      border-radius: 8px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stage {
+      min-height: calc(100vh - 36px);
+      border-radius: 8px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(450px, 1fr) auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 31px;
+      line-height: 1.05;
+    }
+
+    h2 {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h3 {
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .level-pill {
+      min-width: 86px;
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: #e7f0ea;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .lesson {
+      display: grid;
+      gap: 9px;
+      padding: 14px;
+      border: 1px solid rgba(39, 122, 86, .24);
+      border-radius: 8px;
+      background: #f0f7f1;
+      line-height: 1.45;
+    }
+
+    .lesson strong {
+      color: var(--green);
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mode-block {
+      display: grid;
+      gap: 8px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 4px;
+      border-radius: 8px;
+      background: #e9e2d4;
+    }
+
+    .segment {
+      min-height: 38px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 950;
+    }
+
+    .segment.active {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 4px 12px rgba(30, 42, 47, .12);
+    }
+
+    .tool {
+      min-height: 42px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: white;
+      font-weight: 850;
+    }
+
+    .tool.secondary {
+      background: #e9e2d4;
+      color: var(--ink);
+    }
+
+    .tool.good {
+      background: var(--green);
+      color: white;
+    }
+
+    .tool.warn {
+      background: var(--gold);
+      color: #281b05;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      padding: 10px;
+      border: 1px solid rgba(75, 90, 88, .18);
+      border-radius: 8px;
+      background: #fffaf0;
+      text-align: center;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--blue);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .traversals {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    input {
+      width: 100%;
+      min-height: 40px;
+      padding: 0 10px;
+      border: 1px solid rgba(75, 90, 88, .24);
+      border-radius: 8px;
+      background: #fffdf7;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(34, 106, 140, .12);
+    }
+
+    .hint-panel,
+    .answer-panel {
+      display: none;
+      gap: 7px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(34, 106, 140, .24);
+      background: #eef8fb;
+      color: var(--ink);
+      line-height: 1.38;
+      font-size: 14px;
+    }
+
+    .hint-panel.show,
+    .answer-panel.show {
+      display: grid;
+    }
+
+    .topbar {
+      min-height: 88px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid rgba(75, 90, 88, .18);
+    }
+
+    .prompt {
+      display: grid;
+      gap: 6px;
+    }
+
+    .prompt p {
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .status {
+      min-width: 190px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(75, 90, 88, .2);
+      background: #fffaf0;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .board-wrap {
+      position: relative;
+      overflow: auto;
+      background:
+        linear-gradient(rgba(30, 42, 47, .05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 42, 47, .05) 1px, transparent 1px);
+      background-size: 34px 34px;
+    }
+
+    .board {
+      position: relative;
+      width: 980px;
+      height: 620px;
+      margin: 14px auto;
+    }
+
+    svg.links {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .link {
+      stroke: #9aa8a2;
+      stroke-width: 4;
+      stroke-linecap: round;
+    }
+
+    .slot,
+    .ball {
+      position: absolute;
+      width: 74px;
+      height: 74px;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      user-select: none;
+    }
+
+    .slot {
+      border: 3px dashed #b8c3bd;
+      color: var(--muted);
+      background: rgba(255, 253, 247, .76);
+      font-weight: 950;
+      transition: border-color .16s ease, background .16s ease, transform .16s ease;
+    }
+
+    .slot::after {
+      content: attr(data-label);
+      position: absolute;
+      top: 78px;
+      width: 110px;
+      text-align: center;
+      color: #77847e;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .slot.ready {
+      border-color: var(--blue);
+      background: rgba(226, 241, 247, .9);
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .slot.bad {
+      border-color: var(--red);
+      background: rgba(196, 70, 63, .1);
+    }
+
+    .ball {
+      background: #fffdf7;
+      border: 4px solid var(--ink);
+      box-shadow: 0 10px 24px rgba(30, 42, 47, .16);
+      font-size: 27px;
+      font-weight: 950;
+      z-index: 3;
+      cursor: grab;
+      transition: left .2s ease, top .2s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .ball.placed {
+      border-color: var(--green);
+      background: #f7fff8;
+    }
+
+    .ball.next-up {
+      border-color: var(--blue);
+      background: #eef8fb;
+      box-shadow: 0 0 0 4px rgba(34, 106, 140, .18), 0 10px 24px rgba(30, 42, 47, .16);
+    }
+
+    .ball.dragging {
+      cursor: grabbing;
+      z-index: 20;
+      opacity: .94;
+      transition: none;
+    }
+
+    .order-badge {
+      position: absolute;
+      left: -4px;
+      bottom: -4px;
+      width: 23px;
+      height: 23px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--panel);
+      background: var(--ink);
+      color: white;
+      font-size: 11px;
+      font-weight: 950;
+      pointer-events: none;
+    }
+
+    .tray {
+      min-height: 164px;
+      padding: 15px 18px;
+      border-top: 1px solid rgba(75, 90, 88, .18);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255, 253, 247, .96);
+    }
+
+    .pool {
+      position: relative;
+      min-height: 132px;
+      border-radius: 8px;
+      border: 1px dashed rgba(75, 90, 88, .24);
+      background: #faf6ed;
+      overflow: hidden;
+    }
+
+    .pool .ball {
+      width: 60px;
+      height: 60px;
+      border-width: 3px;
+      font-size: 22px;
+    }
+
+    .array-readout {
+      min-width: 220px;
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .array-text {
+      min-height: 32px;
+      color: var(--ink);
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      max-width: min(540px, calc(100vw - 28px));
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: white;
+      box-shadow: var(--shadow);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      font-weight: 800;
+      text-align: center;
+      z-index: 50;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 880px) {
+      .app {
+        width: min(100vw - 18px, 650px);
+        grid-template-columns: 1fr;
+      }
+
+      .stage {
+        min-height: 720px;
+      }
+
+      .topbar,
+      .tray {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .status,
+      .array-readout {
+        min-width: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="side">
+      <div class="brand">
+        <h1>Heap Trainer</h1>
+        <div class="level-pill" id="modePill">Max-Heap</div>
+      </div>
+
+      <section class="lesson" aria-live="polite">
+        <h2>Rule</h2>
+        <p id="ruleText"><strong>Parent values must be larger than their children.</strong> Drag every ball into the complete-tree slots to create the max-heap for the given array.</p>
+      </section>
+
+      <section class="mode-block">
+        <h2>Heap Type</h2>
+        <div class="segmented" id="heapModeMenu">
+          <button class="segment active" data-heap-mode="max">Max</button>
+          <button class="segment" data-heap-mode="min">Min</button>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="stat"><span>Placed</span><strong id="placedCount">0/0</strong></div>
+        <div class="stat"><span>Checks</span><strong id="checkCount">0</strong></div>
+      </section>
+
+      <div class="tool-grid">
+        <button class="tool good" id="checkHeapBtn">Check Heap</button>
+        <button class="tool secondary" id="hintBtn">Hint</button>
+        <button class="tool secondary" id="addNodeBtn">Add Node</button>
+        <button class="tool secondary" id="showAnswerBtn">Show Key</button>
+        <button class="tool warn" id="resetBtn">New Array</button>
+      </div>
+
+      <section class="hint-panel" id="hintPanel" aria-live="polite">
+        <h2>Hint</h2>
+        <p id="hintText"></p>
+      </section>
+
+      <section class="traversals">
+        <h2>Write Traversals</h2>
+        <label>Pre-order
+          <input id="preInput" placeholder="Root, Left, Right">
+        </label>
+        <label>In-order
+          <input id="inInput" placeholder="Left, Root, Right">
+        </label>
+        <label>Post-order
+          <input id="postInput" placeholder="Left, Right, Root">
+        </label>
+        <button class="tool" id="checkTravBtn">Check Traversals</button>
+      </section>
+
+      <section class="answer-panel" id="answerPanel">
+        <h2>Answer Key</h2>
+        <p id="answerText"></p>
+      </section>
+    </aside>
+
+    <section class="stage">
+      <header class="topbar">
+        <div class="prompt">
+          <h2>Build the heap</h2>
+          <p id="promptText">Array balls are randomized each round. The badge shows insertion order. Drop each ball into the max-heap slot where it belongs.</p>
+        </div>
+        <div class="status" id="statusText">Drag a ball into the root</div>
+      </header>
+
+      <div class="board-wrap" id="boardWrap">
+        <div class="board" id="board">
+          <svg class="links" id="links" viewBox="0 0 980 620" aria-hidden="true"></svg>
+        </div>
+      </div>
+
+      <footer class="tray">
+        <h2>Array Balls</h2>
+        <div class="pool" id="pool" aria-label="array balls"></div>
+        <div class="array-readout">
+          <span>Current heap array</span>
+          <div class="array-text" id="arrayText">[]</div>
+        </div>
+      </footer>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let input = [];
+    let slots = [];
+
+    const board = document.querySelector("#board");
+    const links = document.querySelector("#links");
+    const pool = document.querySelector("#pool");
+    const toast = document.querySelector("#toast");
+    const statusText = document.querySelector("#statusText");
+    const modePill = document.querySelector("#modePill");
+    const ruleText = document.querySelector("#ruleText");
+    const promptText = document.querySelector("#promptText");
+    const heapModeMenu = document.querySelector("#heapModeMenu");
+    const placedCount = document.querySelector("#placedCount");
+    const checkCount = document.querySelector("#checkCount");
+    const arrayText = document.querySelector("#arrayText");
+    const hintPanel = document.querySelector("#hintPanel");
+    const hintText = document.querySelector("#hintText");
+    const answerPanel = document.querySelector("#answerPanel");
+    const answerText = document.querySelector("#answerText");
+    const preInput = document.querySelector("#preInput");
+    const inInput = document.querySelector("#inInput");
+    const postInput = document.querySelector("#postInput");
+    const checkHeapBtn = document.querySelector("#checkHeapBtn");
+    const checkTravBtn = document.querySelector("#checkTravBtn");
+    const hintBtn = document.querySelector("#hintBtn");
+    const addNodeBtn = document.querySelector("#addNodeBtn");
+    const showAnswerBtn = document.querySelector("#showAnswerBtn");
+    const resetBtn = document.querySelector("#resetBtn");
+
+    let slotMap = new Map();
+    let ballMap = new Map();
+    let dragging = null;
+    let toastTimer = null;
+    let checks = 0;
+    let heapMode = "max";
+    let targetHeap = [];
+    let answer = {};
+
+    function randomCount(min, max) {
+      return min + Math.floor(Math.random() * (max - min + 1));
+    }
+
+    function randomArray(length = randomCount(5, 12)) {
+      const values = [];
+      while (values.length < length) {
+        const value = 5 + Math.floor(Math.random() * 90);
+        if (!values.includes(value)) values.push(value);
+      }
+      return values;
+    }
+
+    function slotForIndex(index) {
+      const level = Math.floor(Math.log2(index + 1));
+      const first = 2 ** level - 1;
+      const pos = index - first;
+      const count = 2 ** level;
+      return {
+        id: index,
+        x: ((pos + 1) / (count + 1)) * 900 + 40,
+        y: 70 + level * 130,
+        label: index === 0 ? "root" : `index ${index}`,
+        parent: index === 0 ? null : Math.floor((index - 1) / 2),
+      };
+    }
+
+    function createNextSlot() {
+      if (slots.length >= input.length) {
+        showToast("You already have the right number of heap nodes for this array.");
+        return;
+      }
+      const slot = slotForIndex(slots.length);
+      slots.push(slot);
+      createSlot(slot);
+      drawLinks();
+      updateUi();
+      showToast(slot.id === 0 ? "Root node added." : `Heap index ${slot.id} added.`);
+    }
+
+    function buildTargetHeap(values, mode) {
+      const heap = [];
+      values.forEach((value) => {
+        heap.push(value);
+        let index = heap.length - 1;
+        while (index > 0) {
+          const parent = Math.floor((index - 1) / 2);
+          const inOrder = mode === "max"
+            ? heap[parent] >= heap[index]
+            : heap[parent] <= heap[index];
+          if (inOrder) break;
+          [heap[parent], heap[index]] = [heap[index], heap[parent]];
+          index = parent;
+        }
+      });
+      return heap;
+    }
+
+    function traversal(values, type, index = 0, result = []) {
+      if (index >= values.length || values[index] === null) return result;
+      if (type === "pre") result.push(values[index]);
+      traversal(values, type, 2 * index + 1, result);
+      if (type === "in") result.push(values[index]);
+      traversal(values, type, 2 * index + 2, result);
+      if (type === "post") result.push(values[index]);
+      return result;
+    }
+
+    function refreshTarget() {
+      targetHeap = buildTargetHeap(input, heapMode);
+      answer = {
+        pre: traversal(targetHeap, "pre"),
+        in: traversal(targetHeap, "in"),
+        post: traversal(targetHeap, "post"),
+      };
+    }
+
+    function heapName() {
+      return heapMode === "max" ? "max-heap" : "min-heap";
+    }
+
+    function syncModeCopy() {
+      const isMax = heapMode === "max";
+      modePill.textContent = isMax ? "Max-Heap" : "Min-Heap";
+      ruleText.innerHTML = isMax
+        ? "<strong>Parent values must be larger than their children.</strong> Drag every ball into the complete-tree slots to create the max-heap for the given array."
+        : "<strong>Parent values must be smaller than their children.</strong> Drag every ball into the complete-tree slots to create the min-heap for the given array.";
+      promptText.textContent = `Array balls: [${input.join(", ")}]. The badge shows insertion order. Drop each ball into the ${heapName()} slot where it belongs.`;
+      heapModeMenu.querySelectorAll(".segment").forEach((button) => {
+        button.classList.toggle("active", button.dataset.heapMode === heapMode);
+      });
+    }
+
+    function init(keepArray = false) {
+      if (!keepArray || input.length === 0) input = randomArray();
+      refreshTarget();
+      board.querySelectorAll(".slot,.ball").forEach((el) => el.remove());
+      pool.innerHTML = "";
+      links.innerHTML = "";
+      slots = [];
+      slotMap = new Map();
+      ballMap = new Map();
+      dragging = null;
+      checks = 0;
+      preInput.value = "";
+      inInput.value = "";
+      postInput.value = "";
+      hintPanel.classList.remove("show");
+      answerPanel.classList.remove("show");
+      syncModeCopy();
+
+      createNextSlot();
+      input.forEach(createBall);
+      drawLinks();
+      updateUi();
+      showToast(`New ${input.length}-item array: [${input.join(", ")}]. Add nodes, then build the ${heapName()}.`);
+    }
+
+    function createSlot(slot) {
+      const el = document.createElement("div");
+      el.className = "slot";
+      el.dataset.id = slot.id;
+      el.dataset.label = slot.label;
+      el.textContent = "+";
+      el.style.left = `${slot.x}px`;
+      el.style.top = `${slot.y}px`;
+      board.appendChild(el);
+      slotMap.set(slot.id, { ...slot, el, value: null });
+    }
+
+    function createBall(value, index) {
+      const ball = document.createElement("div");
+      ball.className = "ball";
+      ball.dataset.value = value;
+      ball.dataset.home = index;
+      ball.textContent = value;
+
+      const badge = document.createElement("span");
+      badge.className = "order-badge";
+      badge.textContent = index + 1;
+      ball.appendChild(badge);
+
+      pool.appendChild(ball);
+      ballMap.set(value, { el: ball, value, slotId: null, home: index });
+      placeBallInPool(ball, index);
+      ball.addEventListener("pointerdown", startDrag);
+    }
+
+    function placeBallInPool(ball, index) {
+      const width = pool.getBoundingClientRect().width || 540;
+      const colWidth = Math.max(70, Math.floor(width / 7));
+      const col = index % 7;
+      const row = Math.floor(index / 7);
+      ball.style.left = `${38 + col * colWidth}px`;
+      ball.style.top = `${36 + row * 62}px`;
+    }
+
+    function startDrag(event) {
+      const ball = event.currentTarget;
+      const record = ballMap.get(Number(ball.dataset.value));
+      dragging = {
+        ball,
+        value: record.value,
+        originSlot: record.slotId,
+        pointerId: event.pointerId,
+      };
+
+      if (record.slotId !== null) {
+        slotMap.get(record.slotId).value = null;
+        record.slotId = null;
+      }
+
+      ball.classList.add("dragging");
+      ball.classList.remove("placed", "next-up");
+      board.appendChild(ball);
+      ball.setPointerCapture(event.pointerId);
+      moveBallToPointer(event);
+      updateUi();
+
+      ball.addEventListener("pointermove", moveDrag);
+      ball.addEventListener("pointerup", endDrag);
+      ball.addEventListener("pointercancel", cancelDrag);
+    }
+
+    function moveDrag(event) {
+      if (!dragging) return;
+      moveBallToPointer(event);
+      highlightNearestSlot(event);
+    }
+
+    function moveBallToPointer(event) {
+      const rect = board.getBoundingClientRect();
+      dragging.ball.style.left = `${event.clientX - rect.left}px`;
+      dragging.ball.style.top = `${event.clientY - rect.top}px`;
+    }
+
+    function endDrag(event) {
+      if (!dragging) return;
+      clearHighlights();
+      const slot = nearestSlot(event, true);
+      if (slot) {
+        placeInSlot(dragging.ball, slot.id);
+        showToast(`${dragging.value} placed at heap index ${slot.id}.`);
+      } else if (isPoolDrop(event)) {
+        returnToPool(dragging.ball);
+      } else {
+        restoreBall(dragging.ball);
+      }
+      cleanupDrag(event);
+      updateUi();
+    }
+
+    function cancelDrag(event) {
+      if (!dragging) return;
+      restoreBall(dragging.ball);
+      cleanupDrag(event);
+      updateUi();
+    }
+
+    function cleanupDrag(event) {
+      const ball = dragging.ball;
+      ball.classList.remove("dragging");
+      ball.releasePointerCapture(event.pointerId);
+      ball.removeEventListener("pointermove", moveDrag);
+      ball.removeEventListener("pointerup", endDrag);
+      ball.removeEventListener("pointercancel", cancelDrag);
+      dragging = null;
+    }
+
+    function placeInSlot(ball, slotId) {
+      const value = Number(ball.dataset.value);
+      const record = ballMap.get(value);
+      const slot = slotMap.get(slotId);
+
+      if (slot.value !== null && slot.value !== value) {
+        const displaced = ballMap.get(slot.value);
+        if (dragging && dragging.originSlot !== null) {
+          moveToSlot(displaced, dragging.originSlot);
+        } else {
+          returnToPool(displaced.el);
+        }
+      }
+
+      moveToSlot(record, slotId);
+    }
+
+    function moveToSlot(record, slotId) {
+      const slot = slotMap.get(slotId);
+      slot.value = record.value;
+      record.slotId = slotId;
+      record.el.classList.add("placed");
+      record.el.classList.remove("next-up");
+      board.appendChild(record.el);
+      record.el.style.left = `${slot.x}px`;
+      record.el.style.top = `${slot.y}px`;
+    }
+
+    function returnToPool(ball) {
+      const record = ballMap.get(Number(ball.dataset.value));
+      if (record.slotId !== null) {
+        slotMap.get(record.slotId).value = null;
+      }
+      record.slotId = null;
+      ball.classList.remove("placed", "next-up");
+      pool.appendChild(ball);
+      placeBallInPool(ball, record.home);
+    }
+
+    function restoreBall(ball) {
+      const record = ballMap.get(Number(ball.dataset.value));
+      if (dragging.originSlot !== null) {
+        moveToSlot(record, dragging.originSlot);
+      } else {
+        returnToPool(ball);
+      }
+    }
+
+    function nearestSlot(event, loose = false) {
+      const rect = board.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      let best = null;
+      let bestDistance = Infinity;
+
+      slotMap.forEach((slot) => {
+        const distance = Math.hypot(slot.x - x, slot.y - y);
+        if (distance < bestDistance) {
+          best = slot;
+          bestDistance = distance;
+        }
+      });
+
+      return bestDistance <= (loose ? 78 : 60) ? best : null;
+    }
+
+    function highlightNearestSlot(event) {
+      clearHighlights();
+      const slot = nearestSlot(event);
+      if (slot) slot.el.classList.add("ready");
+    }
+
+    function clearHighlights() {
+      slotMap.forEach((slot) => slot.el.classList.remove("ready", "bad"));
+    }
+
+    function isPoolDrop(event) {
+      const rect = pool.getBoundingClientRect();
+      return event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+    }
+
+    function currentHeapArray() {
+      return slots.map((slot) => slotMap.get(slot.id).value);
+    }
+
+    function placedTotal() {
+      return currentHeapArray().filter((value) => value !== null).length;
+    }
+
+    function drawLinks() {
+      links.innerHTML = "";
+      slots.forEach((slot) => {
+        if (slot.parent === null) return;
+        const parent = slotMap.get(slot.parent);
+        const child = slotMap.get(slot.id);
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("class", "link");
+        line.setAttribute("x1", parent.x);
+        line.setAttribute("y1", parent.y);
+        line.setAttribute("x2", child.x);
+        line.setAttribute("y2", child.y);
+        links.appendChild(line);
+      });
+    }
+
+    function updateUi() {
+      const heap = currentHeapArray();
+      const count = placedTotal();
+      placedCount.textContent = `${count}/${input.length}`;
+      checkCount.textContent = checks;
+      arrayText.textContent = `[${heap.map((value) => value === null ? "_" : value).join(", ")}]`;
+
+      slotMap.forEach((slot) => {
+        const open = slot.value === null;
+        slot.el.style.opacity = open ? "1" : ".34";
+        slot.el.style.display = open ? "grid" : "none";
+      });
+
+      const next = input.find((value) => {
+        const record = ballMap.get(value);
+        return record && record.slotId === null;
+      });
+      ballMap.forEach((record) => {
+        record.el.classList.toggle("next-up", record.slotId === null && record.value === next);
+      });
+
+      addNodeBtn.disabled = slots.length >= input.length;
+    }
+
+    function checkHeap() {
+      checks += 1;
+      clearHighlights();
+      const heap = currentHeapArray();
+
+      if (slots.length < input.length) {
+        statusText.textContent = "Add nodes";
+        showToast(`This array has ${input.length} values. Add ${input.length - slots.length} more heap node${input.length - slots.length === 1 ? "" : "s"}.`);
+        updateUi();
+        return;
+      }
+
+      if (heap.some((value) => value === null)) {
+        statusText.textContent = "Missing balls";
+        showToast("Every heap slot needs one ball.");
+        updateUi();
+        return;
+      }
+
+      const wrongIndexes = heap
+        .map((value, index) => value === targetHeap[index] ? null : index)
+        .filter((index) => index !== null);
+
+      if (wrongIndexes.length === 0) {
+        statusText.textContent = "Heap complete";
+        showToast("Correct heap. Now write the traversals.");
+      } else {
+        wrongIndexes.forEach((index) => slotMap.get(index).el.classList.add("bad"));
+        const first = wrongIndexes[0];
+        statusText.textContent = "Keep arranging";
+        showToast(`Not quite. Check heap index ${first}: that slot should come from the insertion-built ${heapName()}.`);
+      }
+      updateUi();
+    }
+
+    function showHint() {
+      const heap = currentHeapArray();
+      const firstEmpty = heap.findIndex((value) => value === null);
+      const firstWrong = heap.findIndex((value, index) => value !== null && value !== targetHeap[index]);
+      hintPanel.classList.add("show");
+
+      if (slots.length < input.length) {
+        hintText.textContent = `Add the next heap node. This round needs ${input.length} total slots, one for each array ball.`;
+        return;
+      }
+
+      if (firstEmpty >= 0) {
+        hintText.textContent = `Try to fill index ${firstEmpty}. In the target heap, that slot will hold ${targetHeap[firstEmpty]}.`;
+        return;
+      }
+
+      if (firstWrong >= 0) {
+        hintText.textContent = `Index ${firstWrong} is the first mismatch. The target ${heapName()} has ${targetHeap[firstWrong]} there.`;
+        return;
+      }
+
+      hintText.textContent = "The heap is correct. Traversal rules: pre is Root-Left-Right, in is Left-Root-Right, post is Left-Right-Root.";
+    }
+
+    function parseAnswer(text) {
+      return text
+        .trim()
+        .split(/[^0-9-]+/)
+        .filter(Boolean)
+        .map(Number);
+    }
+
+    function sameArray(left, right) {
+      return left.length === right.length && left.every((value, index) => value === right[index]);
+    }
+
+    function checkTraversals() {
+      const heap = currentHeapArray();
+      if (slots.length < input.length) {
+        showToast("Add all heap nodes before checking traversals.");
+        return;
+      }
+
+      if (heap.some((value) => value === null)) {
+        showToast("Build the heap first, then write traversals.");
+        return;
+      }
+
+      const heapMatches = heap.every((value, index) => value === targetHeap[index]);
+      if (!heapMatches) {
+        showToast("The heap arrangement is not correct yet.");
+        return;
+      }
+
+      const results = {
+        pre: sameArray(parseAnswer(preInput.value), answer.pre),
+        in: sameArray(parseAnswer(inInput.value), answer.in),
+        post: sameArray(parseAnswer(postInput.value), answer.post),
+      };
+
+      const correct = Object.values(results).filter(Boolean).length;
+      if (correct === 3) {
+        statusText.textContent = "All solved";
+        showToast("All traversals are correct.");
+      } else {
+        const misses = Object.entries(results)
+          .filter((entry) => !entry[1])
+          .map((entry) => entry[0])
+          .join(", ");
+        showToast(`You got ${correct}/3. Recheck: ${misses}.`);
+      }
+    }
+
+    function showAnswers() {
+      answerPanel.classList.add("show");
+      answerText.innerHTML =
+        `<strong>${heapMode === "max" ? "Max-heap" : "Min-heap"}:</strong> [${targetHeap.join(", ")}]<br>` +
+        `<strong>Pre-order:</strong> ${answer.pre.join(" -> ")}<br>` +
+        `<strong>In-order:</strong> ${answer.in.join(" -> ")}<br>` +
+        `<strong>Post-order:</strong> ${answer.post.join(" -> ")}`;
+    }
+
+    function showToast(message) {
+      window.clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("show");
+      toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    checkHeapBtn.addEventListener("click", checkHeap);
+    checkTravBtn.addEventListener("click", checkTraversals);
+    hintBtn.addEventListener("click", showHint);
+    addNodeBtn.addEventListener("click", createNextSlot);
+    showAnswerBtn.addEventListener("click", showAnswers);
+    resetBtn.addEventListener("click", () => init(false));
+    heapModeMenu.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-heap-mode]");
+      if (!button || button.dataset.heapMode === heapMode) return;
+      heapMode = button.dataset.heapMode;
+      init(true);
+    });
+
+    init(false);
+  </script>
+</body>
+</html>
